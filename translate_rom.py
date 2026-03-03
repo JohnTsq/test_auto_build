@@ -19,7 +19,7 @@ def translate_rom(input_path, output_path):
       
     # 示例：简单的文本替换（实际项目中会更复杂）  
     # translated_data = perform_translation(rom_data)  
-    translated_data = bytes(time.strftime("%Y-%m-%d %H:%M:%S")) + rom_data  # 暂时保持原样  
+    translated_data = time.strftime("%Y-%m-%d %H:%M:%S").encode() + rom_data
       
     # 写入翻译后的 ROM  
     with open(output_path, 'wb') as f:  
