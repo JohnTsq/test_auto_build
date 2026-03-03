@@ -1,0 +1,36 @@
+name: Translate ROM  
+  
+on:  
+  push:  
+    branches: [ main ]  
+  workflow_dispatch:  
+  
+jobs:  
+  translate:  
+    runs-on: ubuntu-latest  
+      
+    steps:  
+    - name: Checkout repository  
+      uses: actions/checkout@v4  
+        
+    - name: Checkout original ROM repository  
+      uses: actions/checkout@v4  
+      with:  
+        repository: ${{ secrets.PRIVATE_ROM_REPOSITORY }}  
+        token: ${{ secrets.PRIVATE_ROM_TOKEN }}  
+        path: 'original_rom'  
+          
+    - name: Setup Python  
+      uses: actions/setup-python@v4  
+      with:  
+        python-version: '3.10'  
+          
+    - name: Translate ROM  
+      run: |  
+        python translate_rom.py original_rom/game.gbc translated_rom.gbc  
+          
+    - name: Upload translated ROM  
+      uses: actions/upload-artifact@v4  
+      with:  
+        name: translated-rom  
+        path: translated_rom.gbc
