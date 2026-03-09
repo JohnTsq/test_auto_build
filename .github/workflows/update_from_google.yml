@@ -1,0 +1,47 @@
+name: Update Game Translations from Google Sheets
+
+permissions:
+  contents: write
+
+env:                          # ← 这里定义全局常量（整个 workflow 可见）
+  XLSX_FILE: translations.xlsx
+  CSV_FILE:  translations.csv
+  SHEET_ID:  1uRCgPKgn2G2yLqV3op-v5Uf5s9kNbz_kZvdVfrIZMW0   # 如果想把 Sheet ID 也常量化
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 16 * * *'
+
+jobs:
+  update-translations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl
+
+      - name: Download XLSX from Google Sheets
+        run: |
+          curl -L "https://docs.google.com/spreadsheets/d/${{ env.SHEET_ID }}/export?format=xlsx" -o ${{ env.XLSX_FILE }}
+
+      - name: Convert XLSX to CSV using Python script
+        run: python convert.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.csv || true
+          git commit -m "chore: update translations from Google Sheets" || echo "No changes to commit"
+          git push
